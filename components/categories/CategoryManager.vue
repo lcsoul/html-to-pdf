@@ -96,6 +96,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
 import { useAuthCustom } from '~/composables/useAuth';
+import { useApi } from '~/utils/api';
 
 const props = defineProps<{
   visible: boolean;
@@ -119,6 +120,7 @@ const emit = defineEmits<{
 }>();
 
 const { token } = useAuthCustom();
+const api = useApi();
 const isVisible = ref(props.visible);
 const showForm = ref(!!props.editingCategory);
 const editingCategory = ref(props.editingCategory);
@@ -175,12 +177,7 @@ const deleteCategory = async (category: any) => {
   }
 
   try {
-    const response = await $fetch<{ success: boolean }>(`/api/categories/${category.id}`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${token.value}`
-      }
-    });
+    const response = await api.del<{ success: boolean }>(`/api/categories/${category.id}`);
 
     if (response.success) {
       emit('success', '删除分类成功');
@@ -213,15 +210,8 @@ const handleSubmit = async () => {
     const url = data.id
       ? `/api/categories/${data.id}`
       : '/api/categories';
-    const method = data.id ? 'PUT' : 'POST';
 
-    const response = await $fetch<{ success: boolean }>(url, {
-      method,
-      body: data,
-      headers: {
-        Authorization: `Bearer ${token.value}`
-      }
-    });
+    const response = await (data.id ? api.put : api.post)<{ success: boolean }>(url, data);
 
     if (response.success) {
       emit('success', data.id ? '更新分类成功' : '添加分类成功');

@@ -47,6 +47,7 @@
 
 <script setup lang="ts">
 import { useAuthCustom } from '~/composables/useAuth';
+import { useApi } from '~/utils/api';
 import BookmarkCard from '~/components/bookmarks/BookmarkCard.vue';
 
 const props = defineProps<{
@@ -77,6 +78,7 @@ const emit = defineEmits<{
 }>();
 
 const { token } = useAuthCustom();
+const api = useApi();
 
 // 处理编辑书签
 const handleEditBookmark = (bookmark: any) => {
@@ -93,12 +95,7 @@ const handleDeleteBookmark = async (bookmark: any) => {
   }
 
   try {
-    const response = await $fetch<{ success: boolean }>(`/api/bookmarks/${bookmark.id}`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${token.value}`
-      }
-    });
+    const response = await api.del<{ success: boolean }>(`/api/bookmarks/${bookmark.id}`);
 
     if (response.success) {
       emit('success', '删除网址成功');

@@ -105,6 +105,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useAuthCustom } from '~/composables/useAuth';
+import { useApi } from '~/utils/api';
 import CategorySection from '~/components/categories/CategorySection.vue';
 import BookmarkForm from '~/components/bookmarks/BookmarkForm.vue';
 import CategoryManager from '~/components/categories/CategoryManager.vue';
@@ -126,7 +127,8 @@ interface Bookmark {
   is_deleted: boolean;
 }
 
-const { user, token } = useAuthCustom();
+const { user } = useAuthCustom();
+const api = useApi();
 
 const categories = ref<Category[]>([]);
 const bookmarks = ref<Bookmark[]>([]);
@@ -162,11 +164,7 @@ const isLoading = ref(false);
 const fetchCategories = async () => {
   isLoading.value = true;
   try {
-    const response = await $fetch<{ success: boolean; categories: Category[] }>('/api/categories', {
-      headers: token.value ? {
-        Authorization: `Bearer ${token.value}`
-      } : undefined
-    });
+    const response = await api.get<{ success: boolean; categories: Category[] }>('/api/categories');
     if (response.success) {
       categories.value = response.categories.sort((a, b) => a.order_index - b.order_index);
     }
@@ -182,11 +180,7 @@ const fetchCategories = async () => {
 const fetchBookmarks = async () => {
   isLoading.value = true;
   try {
-    const response = await $fetch<{ success: boolean; bookmarks: Bookmark[] }>('/api/bookmarks', {
-      headers: token.value ? {
-        Authorization: `Bearer ${token.value}`
-      } : undefined
-    });
+    const response = await api.get<{ success: boolean; bookmarks: Bookmark[] }>('/api/bookmarks');
     if (response.success) {
       bookmarks.value = response.bookmarks.filter(b => !b.is_deleted);
     }

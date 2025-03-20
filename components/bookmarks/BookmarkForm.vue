@@ -79,6 +79,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
 import { useAuthCustom } from '~/composables/useAuth';
+import { useApi } from '~/utils/api';
 
 const props = defineProps<{
   visible: boolean;
@@ -105,6 +106,7 @@ const emit = defineEmits<{
 }>();
 
 const { token } = useAuthCustom();
+const api = useApi();
 const isVisible = ref(props.visible);
 const isEditing = computed(() => !!props.editingBookmark);
 const isSubmitting = ref(false);
@@ -163,15 +165,8 @@ const handleSubmit = async () => {
     const url = data.id
       ? `/api/bookmarks/${data.id}`
       : '/api/bookmarks';
-    const method = data.id ? 'PUT' : 'POST';
 
-    const response = await $fetch<{ success: boolean }>(url, {
-      method,
-      body: data,
-      headers: {
-        Authorization: `Bearer ${token.value}`
-      }
-    });
+    const response = await (data.id ? api.put : api.post)<{ success: boolean }>(url, data);
 
     if (response.success) {
       emit('update:visible', false);

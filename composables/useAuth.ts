@@ -1,4 +1,5 @@
 import { ref, useState } from '#imports'
+import { useApi } from '~/utils/api'
 
 interface User {
   id: number
@@ -25,13 +26,11 @@ interface AuthResponse {
 export const useAuthCustom = () => {
   const user = useState<User | null>('auth-user', () => null)
   const token = useState<string | null>('auth-token', () => null)
+  const api = useApi()
 
   const login = async (form: LoginForm) => {
     try {
-      const response = await $fetch<AuthResponse>('/api/auth/login', {
-        method: 'POST',
-        body: form
-      })
+      const response = await api.post<AuthResponse>('/api/auth/login', form)
 
       if (response.success && response.user && response.token) {
         user.value = response.user
@@ -51,10 +50,7 @@ export const useAuthCustom = () => {
 
   const register = async (form: RegisterForm) => {
     try {
-      const response = await $fetch<AuthResponse>('/api/auth/register', {
-        method: 'POST',
-        body: form
-      })
+      const response = await api.post<AuthResponse>('/api/auth/register', form)
 
       if (response.success) {
         return response
@@ -70,9 +66,7 @@ export const useAuthCustom = () => {
 
   const logout = async () => {
     try {
-      await $fetch<AuthResponse>('/api/auth/logout', {
-        method: 'POST'
-      })
+      await api.post<AuthResponse>('/api/auth/logout', {})
       user.value = null
       token.value = null
       if (process.client) {
@@ -97,23 +91,22 @@ export const useAuthCustom = () => {
       }
 
       console.log('正在验证存储的 token...')
+      token.value = storedToken // 先设置token，以便api请求时自动带上
+
       try {
-        const response = await $fetch<AuthResponse>('/api/auth/session', {
-          headers: {
-            Authorization: `Bearer ${storedToken}`
-          }
-        })
+        const response = await api.get<AuthResponse>('/api/auth/session')
 
         if (response.success && response.user) {
           console.log('Token 有效，已恢复用户会话:', response.user.username)
           user.value = response.user
-          token.value = storedToken
         } else {
           console.warn('Token 无效或用户会话已过期')
+          token.value = null
           localStorage.removeItem('token')
         }
       } catch (error: any) {
         console.error('会话验证失败:', error.message || error)
+        token.value = null
         localStorage.removeItem('token')
       }
     }
