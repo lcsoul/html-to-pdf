@@ -2,16 +2,28 @@
   <div class="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-7xl mx-auto">
     <div class="flex flex-wrap justify-between items-center mb-6">
       <h1 class="text-xl sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-0">网址导航</h1>
-      <button
-        v-if="user"
-        @click="showAddModal = true"
-        class="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-        </svg>
-        添加网址
-      </button>
+      <div class="flex items-center space-x-2">
+        <button
+          v-if="user && categories.length > 0"
+          @click="showAddModal = true"
+          class="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          添加网址
+        </button>
+        <button
+          v-if="user"
+          @click="showCategoryModal = true"
+          class="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+          </svg>
+          管理分类
+        </button>
+      </div>
     </div>
 
     <!-- 加载状态指示器 -->
@@ -25,7 +37,7 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
       </svg>
       <p class="text-lg text-gray-600">暂无分类和网址</p>
-      <p v-if="user" class="text-gray-500 mt-2">点击右上角的添加按钮开始创建</p>
+      <p v-if="user" class="text-gray-500 mt-2">请先添加分类，然后添加网址</p>
     </div>
 
     <!-- 分类列表 -->
@@ -182,45 +194,90 @@
       </template>
     </Modal>
 
-    <!-- 添加/编辑分类弹窗 -->
+    <!-- 分类管理弹窗 -->
     <Modal v-model="showCategoryModal">
-      <template #title>{{ editingCategory ? '编辑分类' : '添加分类' }}</template>
+      <template #title>分类管理</template>
       <template #content>
-        <form @submit.prevent="handleCategorySubmit" class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700">名称</label>
-            <input
-              v-model="categoryForm.name"
-              type="text"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm sm:text-base"
-              required
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700">排序</label>
-            <input
-              v-model="categoryForm.order_index"
-              type="number"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm sm:text-base"
-              required
-            />
-          </div>
+        <div class="space-y-4">
           <div class="flex justify-end">
             <button
-              type="button"
-              @click="showCategoryModal = false"
-              class="mr-2 inline-flex justify-center rounded-md border border-gray-300 bg-white py-1.5 px-3 sm:py-2 sm:px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              @click="showAddCategoryForm = true"
+              class="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
-              取消
-            </button>
-            <button
-              type="submit"
-              class="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-1.5 px-3 sm:py-2 sm:px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-            >
-              {{ editingCategory ? '保存' : '添加' }}
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+              添加分类
             </button>
           </div>
-        </form>
+
+          <!-- 分类列表 -->
+          <div class="space-y-2">
+            <div v-for="category in categories" :key="category.id" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div class="flex items-center space-x-3">
+                <span class="text-gray-900">{{ category.name }}</span>
+                <span class="text-sm text-gray-500">(排序: {{ category.order_index }})</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <button
+                  @click="editCategory(category)"
+                  class="text-gray-600 hover:text-gray-900"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+                <button
+                  @click="deleteCategory(category)"
+                  class="text-red-600 hover:text-red-900"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 添加/编辑分类表单 -->
+          <div v-if="showAddCategoryForm" class="mt-4 pt-4 border-t">
+            <form @submit.prevent="handleCategorySubmit" class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700">名称</label>
+                <input
+                  v-model="categoryForm.name"
+                  type="text"
+                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm sm:text-base"
+                  required
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700">排序</label>
+                <input
+                  v-model="categoryForm.order_index"
+                  type="number"
+                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm sm:text-base"
+                  required
+                />
+              </div>
+              <div class="flex justify-end">
+                <button
+                  type="button"
+                  @click="showAddCategoryForm = false"
+                  class="mr-2 inline-flex justify-center rounded-md border border-gray-300 bg-white py-1.5 px-3 sm:py-2 sm:px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                >
+                  取消
+                </button>
+                <button
+                  type="submit"
+                  class="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-1.5 px-3 sm:py-2 sm:px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                >
+                  {{ editingCategory ? '保存' : '添加' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       </template>
     </Modal>
 
@@ -236,14 +293,7 @@
     <!-- 移动端悬浮添加按钮 -->
     <div v-if="user" class="fixed bottom-6 right-6 sm:hidden z-10 flex flex-col space-y-2">
       <button
-        @click="showCategoryModal = true"
-        class="w-12 h-12 rounded-full bg-indigo-600 text-white shadow-lg flex items-center justify-center hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-        </svg>
-      </button>
-      <button
+        v-if="categories.length > 0"
         @click="showAddModal = true"
         class="w-12 h-12 rounded-full bg-indigo-600 text-white shadow-lg flex items-center justify-center hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
       >
@@ -283,6 +333,7 @@ const bookmarks = ref<Bookmark[]>([])
 
 const showAddModal = ref(false)
 const showCategoryModal = ref(false)
+const showAddCategoryForm = ref(false)
 const editingBookmark = ref<Bookmark | null>(null)
 const editingCategory = ref<Category | null>(null)
 
@@ -456,12 +507,12 @@ const handleBookmarkSubmit = async () => {
 const editCategory = (category: Category) => {
   editingCategory.value = category
   categoryForm.value = { ...category }
-  showCategoryModal.value = true
+  showAddCategoryForm.value = true
 }
 
 // 删除分类
 const deleteCategory = async (category: Category) => {
-  if (!confirm('确定要删除这个分类吗？')) return
+  if (!confirm('确定要删除这个分类吗？删除后该分类下的所有网址将被删除。')) return
 
   try {
     const response = await $fetch<{ success: boolean }>(`/api/categories/${category.id}`, {
@@ -471,7 +522,7 @@ const deleteCategory = async (category: Category) => {
       }
     })
     if (response.success) {
-      await fetchCategories()
+      await Promise.all([fetchCategories(), fetchBookmarks()])
       showSuccess('删除分类成功')
     }
   } catch (error: any) {
@@ -501,7 +552,7 @@ const handleCategorySubmit = async () => {
     })
 
     if (response.success) {
-      showCategoryModal.value = false
+      showAddCategoryForm.value = false
       editingCategory.value = null
       categoryForm.value = {
         name: '',
