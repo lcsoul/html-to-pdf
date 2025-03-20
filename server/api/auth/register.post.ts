@@ -1,5 +1,4 @@
 import { initDB } from '../../db/init'
-import bcrypt from 'bcryptjs'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -39,13 +38,10 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // 密码加密
-    const hashedPassword = await bcrypt.hash(password, 10)
-
-    // 创建用户
+    // 创建用户（密码已经在客户端使用SHA-256加密）
     const result = await db.run(
       'INSERT INTO users (username, password) VALUES (?, ?)',
-      [username, hashedPassword]
+      [username, password]
     )
 
     return {

@@ -1,5 +1,6 @@
 import { ref, useState } from '#imports'
 import { useApi } from '~/utils/api'
+import { sha256 } from '~/utils/crypto'
 
 interface User {
   id: number
@@ -30,7 +31,13 @@ export const useAuthCustom = () => {
 
   const login = async (form: LoginForm) => {
     try {
-      const response = await api.post<AuthResponse>('/api/auth/login', form)
+      // 加密密码
+      const hashedPassword = await sha256(form.password)
+
+      const response = await api.post<AuthResponse>('/api/auth/login', {
+        username: form.username,
+        password: hashedPassword
+      })
 
       if (response.success && response.user && response.token) {
         user.value = response.user
@@ -50,7 +57,13 @@ export const useAuthCustom = () => {
 
   const register = async (form: RegisterForm) => {
     try {
-      const response = await api.post<AuthResponse>('/api/auth/register', form)
+      // 加密密码
+      const hashedPassword = await sha256(form.password)
+
+      const response = await api.post<AuthResponse>('/api/auth/register', {
+        username: form.username,
+        password: hashedPassword
+      })
 
       if (response.success) {
         return response

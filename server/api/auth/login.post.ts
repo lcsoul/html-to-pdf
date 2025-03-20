@@ -1,6 +1,7 @@
 import { initDB } from '../../db/init'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
+import crypto from 'crypto'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -26,9 +27,8 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // 验证密码
-    const isValid = await bcrypt.compare(password, user.password)
-    if (!isValid) {
+    // 验证密码（客户端已经使用SHA-256加密，这里直接比较）
+    if (password !== user.password) {
       throw createError({
         statusCode: 401,
         message: '用户名或密码错误'
