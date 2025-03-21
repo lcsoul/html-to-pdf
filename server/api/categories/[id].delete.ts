@@ -1,7 +1,17 @@
 import { initDB } from '../../db/init'
+import { getToken } from '../auth/utils'
 
 export default defineEventHandler(async (event) => {
   try {
+    // 验证用户是否已登录
+    const token = await getToken(event)
+    if (!token) {
+      throw createError({
+        statusCode: 401,
+        message: '无权限删除，请先登录'
+      })
+    }
+
     const id = getRouterParam(event, 'id')
     const db = await initDB()
 
